@@ -23,6 +23,17 @@
     --w03:#aaa;
     --s:#00000050;
     --s01:#00000030;
+
+
+    --txt:#000;
+    --txt-light:#999;
+    --shadow:#00000050;
+    --light:#fff;
+    --border:#ddd;
+    --bg:#fafafa;
+    --point:#e9536b;
+    --btn:#0070c0;
+    --font:'Noto Sans KR','Open Sans',sans-serif;
 }
 @media (max-width:770px){
     span.ctrl_checkbox{margin:20px 20px 0;}
