@@ -153,24 +153,21 @@
                             $act_button = isset($row['act_button']) ? $row['act_button'] : 0;
                             $period = isset($row['period']) ? $row['period'] : '';
                             $year_month_day = isset($row['year_month_day']) ? $row['year_month_day'] : '';
+
+                            $date_hash = password_hash($year_month_day.'ax2$@$$!w', PASSWORD_DEFAULT);
                     ?>
-                    <form onsubmit="return create_token(this);">
-                        <tbody>
-                            <tr>
-                                <input type="hidden" name="date" value="<?=$year_month_day?>" />
-                                <input type="hidden" name="_csrfToken" value="<?=$_csrfToken?>" />
-                                <td><?=$period?></td>
-                                <td><?=number_format($tot_leader_comm)?></td>
-                                <td>
-                                    <button type="submit">버튼</button>
-                                </td>
-                                <td>1234</td>
-                            </tr>
-                            <?php } // end while ?>
-                        </tbody>
-                    </form>
+                    <tbody>
+                        <tr>
+                            <td><?=$period?></td>
+                            <td><?=number_format($tot_leader_comm)?></td>
+                            <td>
+                                <button onclick="create_token('<?=$year_month_day?>', '<?=$date_hash?>', '<?=$_csrfToken?>');">버튼</button>
+                            </td>
+                            <td>1234</td>
+                        </tr>
+                        <?php } // end while ?>
+                    </tbody>
                 </table>
-                <?=$pagination?>
             </div>
         </div>
     </section>
