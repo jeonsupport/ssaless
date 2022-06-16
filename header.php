@@ -18,12 +18,12 @@
 <meta name="format-detection" content="telephone=no">
 <link href="assets/img/favicon.ico" rel="icon">
 <link href="assets/img/i_logo.png" rel="apple-touch-icon">
-<link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<!-- <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
 <link href="assets/css/base.css" rel="stylesheet">
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <script src="assets/vendor/jquery/jquery.min.js"></script>
 <script src="assets/vendor/jquery/jquery-migrate.min.js"></script>
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
 </head>
 <body>
 <header id="header">
