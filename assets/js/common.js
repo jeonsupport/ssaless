@@ -27,7 +27,7 @@ function create_token(date, hash, csrf) {
             error: function (err) {
                 console.log("just only error!! : " + err);
             }
-          });
+        });
     }
 
 }
