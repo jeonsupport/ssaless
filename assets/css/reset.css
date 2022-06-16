@@ -39,6 +39,7 @@ input{height:100%;font-size:14px;border:1px solid #ccc;cursor:pointer;font-famil
 button:disabled{filter:none!important;background:var(--border)!important;color:var(--txt-light)!important;cursor:auto}
 button:disabled:hover{filter:none!important;background:var(--border)!important;transition:none;color:var(--txt-light)!important}
 select{border-radius:0;border:1px solid #434343;height:42px;margin:0;padding:0 35px 0 10px;vertical-align:middle;cursor:pointer;background:#fff url(../img/i_arrow.gif) no-repeat;background-position:calc(100% - 12px) 54%;}
+::placeholder{color:#adadad}
 input:focus,
 textarea:focus,
 select:focus,
