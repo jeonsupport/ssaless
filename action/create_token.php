@@ -98,6 +98,8 @@
 
         if ($price==0 && $share==0) {
             throw new Exception('금액이 부족합니다.');
+        } else if ($price!=0) {
+            $share_flag = 0;
         } else {
             $share_flag = 1;
         }
@@ -134,11 +136,13 @@
                                                     , user_id
                                                     , price
                                                     , token
+                                                    , balance
                                                 ) VALUES (
                                                     :set_date
                                                     , :user_id
                                                     , :price
                                                     , :token
+                                                    , :balance
                                                 )
             ";
         $statement = $db->prepare($query);
@@ -147,9 +151,11 @@
         if (!$share_flag) { // 금액이 있지만 1000원 미만일 경우 잔액만 업로드 한다.
             $statement->bindValue(':price', intval($price));
             $statement->bindValue(':token', $result['token']);
+            $statement->bindValue(':balance', $share);
         } else {
             $statement->bindValue(':price', NULL);
-            $statement->bindValue(':token', NULL);
+            $statement->bindValue(':token', 'balance');
+            $statement->bindValue(':balance', $share);
         }
         $statement->execute();
         $rowCount = $statement->rowCount();
@@ -179,12 +185,17 @@
         // 완료되었으면 커밋
         $db->commit();
 
-        if (!$share_flag) {
+        if ($share==0) {
+
+            
             $result_array = array (
                 'status' => 1
                 , 'msg'  => 'ok'
             );
+
+
         } else {
+
             $result_array = array (
                 'status' => 2
                 , 'msg'  => 'ok'
@@ -193,7 +204,6 @@
         }
 
         
-
         return parseJson($result_array);
         
     } catch(Exception $e) {

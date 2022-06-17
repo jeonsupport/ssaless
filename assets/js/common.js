@@ -22,6 +22,7 @@ function create_token(date, hash, csrf) {
                     location.reload();
                 } else if(data.status == 2){
                     alert(data.data);
+                    location.reload();
                 } else {
                     alert(data.msg);
                 }
