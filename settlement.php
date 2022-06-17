@@ -7,6 +7,14 @@
     $conn = new Database_Connecter();
     $db = $conn->MYSQL_ConnectServer();
 
+    echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
+    $a  = 12505;
+    $b = 1000;
+    echo floor($a/1000) * 1000;
+    echo "<br>";
+    echo $a % $b; 
+
+
 
     // 세션 파라미터
     $session_user_id = isset($_SESSION['UserID']) ? $_SESSION['UserID'] : '';
@@ -16,7 +24,6 @@
 
     // 파라미터
     $get_month = isset($_GET['month']) && !empty($_GET['month']) ? $_GET['month'] : date('Y-m');
-
 
 
     //--------------------------------------------------------
@@ -33,7 +40,7 @@
     $year_last = $get_month.'-'.date('t', strtotime($get_month));
     $year_21_last = date("Y-m", strtotime("+1 month", strtotime($get_month))).'-05';
 
-
+    $where_cond = $session_grp_flag==1 ? "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp)" : "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp AND user_id = '{$session_user_id}')";
     // 쿼리
     try {
         $query = 
@@ -57,7 +64,7 @@
                                 ON a.recommender = c.user_id
                             JOIN sales_group_list d
                                 ON c.grp = d.grp
-                            WHERE  a.recommender IN (SELECT user_id FROM  sales_member WHERE  grp = :grp)
+                            WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_1' AND '$year_10'
                     ) AS tot_table 
                 )
@@ -81,7 +88,7 @@
                                 ON a.recommender = c.user_id
                             JOIN sales_group_list d
                                 ON c.grp = d.grp
-                            WHERE  a.recommender IN (SELECT user_id FROM  sales_member WHERE  grp = :grp)
+                            WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_11' AND '$year_20'
                     ) AS tot_table 
                 )
@@ -105,7 +112,7 @@
                                 ON a.recommender = c.user_id
                             JOIN sales_group_list d
                                 ON c.grp = d.grp
-                            WHERE  a.recommender IN (SELECT user_id FROM  sales_member WHERE  grp = :grp)
+                            WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_21' AND '$year_last'
                     ) AS tot_table 
                 )
@@ -124,7 +131,7 @@
     <section class="contWrap inner">
         <div class="titleBox">
             <div class="admin_btn">
-                <p class="btn btn-light"><?=$session_user_id.$str_grp?> 님</p>
+                <p><?=$session_user_id.$str_grp?> 님</p>
                 <button type="button" class="btn" onclick="location.replace('./action/logout.php');">로그아웃</button>
             </div>
             <h1>정산</h1>
@@ -133,7 +140,7 @@
             <div class="contInput">
                 <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
                     <input type="month" name="month" value="<?=$get_month?>"> 
-                    <button type="submit" class="btn go">조회</button>
+                    <button type="submit" class="btn">조회</button>
                 </form>
             </div>
             <div class="contTable">

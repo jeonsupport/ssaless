@@ -103,7 +103,7 @@
                 <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
                     <input type="date" name="dateA" value="<?=$startDate?>"> ~ 
                     <input type="date" name="dateB" value="<?=$endDate?>">
-                    <button type="submit" class="btn go">조회</button>
+                    <button type="submit" class="btn">조회</button>
                 </form>
             </div>
             <ul class='flexBox'>
