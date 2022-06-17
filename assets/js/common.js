@@ -20,6 +20,8 @@ function create_token(date, hash, csrf) {
                 if(data.status == 1) {
                     alert('성공');
                     location.reload();
+                } else if(data.status == 2){
+                    alert(data.data);
                 } else {
                     alert(data.msg);
                 }

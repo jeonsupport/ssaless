@@ -23,6 +23,7 @@
         $csrf = isset($_POST['csrf']) && !empty($_POST['csrf']) ? strip_tags($_POST['csrf']) : $param_error .= 'csrf;';
         $salt = 'ax2$@$$!w';
 
+
         //---------------------------------------
         // 유효성 체크
         //---------------------------------------
@@ -54,6 +55,9 @@
             $start_date = $year.'-'.$month.'-11';
             $end_date = $year.'-'.$month.'-20';
         } else if ($day==='05') {
+            $month = intval($month) - 1;
+            $month = strlen($month)==1 ? '0'.strval($month) : strval($month);
+
             $start_date = $year.'-'.$month.'-21';
             $end_date = $year.'-'.$month.'-'.date('t', strtotime($year.'-'.$month));
         } else {
@@ -89,27 +93,38 @@
 
         $price = $session_grp_flag==1 ? floor($tot_leader_comm/1000) * 1000 : floor($tot_sa_comm/1000) * 1000;
         $share = $session_grp_flag==1 ? $tot_leader_comm % 1000 : $tot_sa_comm % 1000;
-        if ($price==0) throw new Exception('금액이 부족합니다.(1,000원 이상부터)');
+        $share_flag = 0;
 
-        //---------------------------------------            
-        //api 전송
-        //---------------------------------------
-        $request_array = array (
-            'auth'         => 'ab3cc932e99600ef8e3f361e8ea0653f121b986e06f52b8c5fe0b06a53307d00'
-            , 'action'     => 'qrCreateToken'
-            , 'product_no' => 1008
-            , 'price'      => intval($price)
-        );
 
-        $json = post(API_URL, $request_array);
-        $result = json_decode($json, true);
-        if ($result['status'] == 0) throw new Exception($result['msg']);
+        if ($price==0 && $share==0) {
+            throw new Exception('금액이 부족합니다.');
+        } else {
+            $share_flag = 1;
+        }
+
+        if (!$share_flag) { // 금액이 있지만 1000원 미만일 경우 잔액만 업로드 한다.
+            //---------------------------------------            
+            //api 전송
+            //---------------------------------------
+            $request_array = array (
+                'auth'         => 'ab3cc932e99600ef8e3f361e8ea0653f121b986e06f52b8c5fe0b06a53307d00'
+                , 'action'     => 'qrCreateToken'
+                , 'product_no' => 1008
+                , 'price'      => intval($price)
+            );
+
+            $json = post(API_URL, $request_array);
+            $result = json_decode($json, true);
+            if ($result['status'] == 0) throw new Exception($result['msg']);
+        }
+
 
         //---------------------------------------------------------------------------------------------------------------
         // 트랜잭션 시작
         $db->beginTransaction();
 
 
+        
         //---------------------------------------
         // 추출 핀코드 저장
         //---------------------------------------
@@ -129,8 +144,13 @@
         $statement = $db->prepare($query);
         $statement->bindValue(':set_date', $date);
         $statement->bindValue(':user_id', $session_user_id);
-        $statement->bindValue(':price', intval($price));
-        $statement->bindValue(':token', $result['token']);
+        if (!$share_flag) { // 금액이 있지만 1000원 미만일 경우 잔액만 업로드 한다.
+            $statement->bindValue(':price', intval($price));
+            $statement->bindValue(':token', $result['token']);
+        } else {
+            $statement->bindValue(':price', NULL);
+            $statement->bindValue(':token', NULL);
+        }
         $statement->execute();
         $rowCount = $statement->rowCount();
         if ($rowCount <> 1) {
@@ -159,12 +179,20 @@
         // 완료되었으면 커밋
         $db->commit();
 
+        if (!$share_flag) {
+            $result_array = array (
+                'status' => 1
+                , 'msg'  => 'ok'
+            );
+        } else {
+            $result_array = array (
+                'status' => 2
+                , 'msg'  => 'ok'
+                , 'data' => '잔금 '.$share.'원이 추가되었습니다.'
+            );
+        }
 
-        $result_array = array (
-            'status' => 1
-            , 'msg'  => 'ok'
-        );
-
+        
 
         return parseJson($result_array);
         

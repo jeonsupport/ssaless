@@ -45,12 +45,14 @@
                             , '$year_1 ~ $year_10' AS period
                             , '$year_1_10' AS year_month_day
                             , token
+                            , price
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_1_10', 1, 0) AS act_button
                                 , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as token
+                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as price
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
@@ -71,12 +73,14 @@
                             , '$year_11 ~ $year_20' AS period
                             , '$year_11_20' AS year_month_day
                             , token
+                            , price
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_11_20', 1, 0) AS act_button
                                 , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as token
+                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as price
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
@@ -97,12 +101,14 @@
                             , '$year_21 ~ $year_last' AS period
                             , '$year_21_last' AS year_month_day
                             , token
+                            , price
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_21_last', 1, 0) AS act_button
                                 , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as token
+                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as price
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
@@ -150,10 +156,12 @@
                             <td>기간</td>
                             <td>수수료 합계</td>
                             <td>정산</td>
+                            <td>핀코드 금액</td>
                             <td>핀코드</td>
                         </tr> 
                     </thead>
                     <?php
+                        
                         while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
                             $tot_leader_comm = isset($row['tot_leader_comm']) && !empty($row['tot_leader_comm']) ? $row['tot_leader_comm'] : 0;
                             $tot_sa_comm = isset($row['tot_sa_comm']) && !empty($row['tot_sa_comm']) ? $row['tot_sa_comm'] : 0;
@@ -161,6 +169,7 @@
                             $period = isset($row['period']) ? $row['period'] : '';
                             $year_month_day = isset($row['year_month_day']) ? $row['year_month_day'] : '';
                             $token = isset($row['token']) && !empty($row['token']) ? $row['token'] : '-';
+                            $price = isset($row['price']) && !empty($row['price']) ? number_format($row['price']) : '-';
 
                             $date_hash = password_hash($year_month_day.'ax2$@$$!w', PASSWORD_DEFAULT);
                     ?>
@@ -177,6 +186,7 @@
                                     <button disabled>정산</button>
                                 <?php } ?>
                             </td>
+                            <td><?=$price?></td>
                             <td><?=$token?></td>
                         </tr>
                         <?php } // end while ?>
