@@ -7,14 +7,6 @@
     $conn = new Database_Connecter();
     $db = $conn->MYSQL_ConnectServer();
 
-    echo "<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>";
-    $a  = 12505;
-    $b = 1000;
-    echo floor($a/1000) * 1000;
-    echo "<br>";
-    echo $a % $b; 
-
-
 
     // 세션 파라미터
     $session_user_id = isset($_SESSION['UserID']) ? $_SESSION['UserID'] : '';
@@ -52,17 +44,19 @@
                             , act_button
                             , '$year_1 ~ $year_10' AS period
                             , '$year_1_10' AS year_month_day
+                            , token
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_1_10', 1, 0) AS act_button
+                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as token
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
                             JOIN sales_member AS c
                                 ON a.recommender = c.user_id
-                            JOIN sales_group_list d
+                            JOIN sales_group_list AS d
                                 ON c.grp = d.grp
                             WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_1' AND '$year_10'
@@ -76,17 +70,19 @@
                             , act_button
                             , '$year_11 ~ $year_20' AS period
                             , '$year_11_20' AS year_month_day
+                            , token
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_11_20', 1, 0) AS act_button
+                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as token
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
                             JOIN sales_member AS c
                                 ON a.recommender = c.user_id
-                            JOIN sales_group_list d
+                            JOIN sales_group_list AS d
                                 ON c.grp = d.grp
                             WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_11' AND '$year_20'
@@ -100,23 +96,27 @@
                             , act_button
                             , '$year_21 ~ $year_last' AS period
                             , '$year_21_last' AS year_month_day
+                            , token
                     FROM (
                             SELECT b.seq_no AS seq_no
                                 , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
                                 , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
                                 , IF(curdate() >= '$year_21_last', 1, 0) AS act_button
+                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as token
                             FROM   info_service AS a
                             JOIN commission_history AS b
                                 ON a.token = b.auth_key
                             JOIN sales_member AS c
                                 ON a.recommender = c.user_id
-                            JOIN sales_group_list d
+                            JOIN sales_group_list AS d
                                 ON c.grp = d.grp
                             WHERE  {$where_cond}
                             AND DATE(b.reg_date) BETWEEN '$year_21' AND '$year_last'
                     ) AS tot_table 
                 )
             ";
+
+
 
         $statement = $db->prepare($query);
         $statement->bindValue(':grp', $session_grp);
@@ -160,17 +160,24 @@
                             $act_button = isset($row['act_button']) ? $row['act_button'] : 0;
                             $period = isset($row['period']) ? $row['period'] : '';
                             $year_month_day = isset($row['year_month_day']) ? $row['year_month_day'] : '';
+                            $token = isset($row['token']) && !empty($row['token']) ? $row['token'] : '-';
 
                             $date_hash = password_hash($year_month_day.'ax2$@$$!w', PASSWORD_DEFAULT);
                     ?>
                     <tbody>
                         <tr>
                             <td><?=$period?></td>
-                            <td><?=number_format($tot_leader_comm)?></td>
+                            <td><?=$session_grp_flag==1 ? number_format($tot_leader_comm) : number_format($tot_sa_comm)?></td>
                             <td>
-                                <button onclick="create_token('<?=$year_month_day?>', '<?=$date_hash?>', '<?=$_csrfToken?>');">버튼</button>
+                                <?php 
+                                    if ($token=='-' && $act_button==1) {
+                                ?>
+                                    <button onclick="create_token('<?=$year_month_day?>', '<?=$date_hash?>', '<?=$_csrfToken?>');">정산</button>
+                                <?php } else { ?>
+                                    <button disabled>정산</button>
+                                <?php } ?>
                             </td>
-                            <td>1234</td>
+                            <td><?=$token?></td>
                         </tr>
                         <?php } // end while ?>
                     </tbody>

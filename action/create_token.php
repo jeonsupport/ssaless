@@ -10,8 +10,9 @@
 
     try {
 
-
+        //---------------------------------------
         // 세션 파라미터
+        //---------------------------------------
         $session_user_id = isset($_SESSION['UserID']) ? $_SESSION['UserID'] : '';
         $session_grp = isset($_SESSION['Grp']) ? $_SESSION['Grp'] : '';
         $session_grp_flag = isset($_SESSION['GrpFlag']) ? $_SESSION['GrpFlag'] : '';
@@ -22,6 +23,9 @@
         $csrf = isset($_POST['csrf']) && !empty($_POST['csrf']) ? strip_tags($_POST['csrf']) : $param_error .= 'csrf;';
         $salt = 'ax2$@$$!w';
 
+        //---------------------------------------
+        // 유효성 체크
+        //---------------------------------------
         // 레퍼 체크
         if (!check_referer()) throw new Exception('잘못된 접근입니다.(1)');
 
@@ -34,8 +38,9 @@
         // date 검증
         if (!password_verify($date.$salt, $hash)) throw new Exception('잘못된 접근입니다.(4)');
 
-
+        //---------------------------------------
         // 금액 추출
+        //---------------------------------------
         $arr_date = explode('-', $date);
         $year  = isset($arr_date[0]) && !empty($arr_date[0]) ? strval($arr_date[0]) : '';
         $month = isset($arr_date[1]) && !empty($arr_date[1]) ? strval($arr_date[1]) : '';
@@ -55,9 +60,8 @@
             throw new Exception ('잘못된 접근입니다.(5)');
         }
 
-        // temp테이블 체크할 것!
-
-
+        // temp테이블 체크할 것!!!!!!!!!!!!!!!!!!!!!!
+        $where_cond = $session_grp_flag==1 ? "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp)" : "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp AND user_id = '{$session_user_id}')";
         $query = 
             "
                 SELECT Sum(leader_comm) AS tot_leader_comm
@@ -72,7 +76,7 @@
                                 ON a.recommender = c.user_id
                             JOIN sales_group_list d
                                 ON c.grp = d.grp
-                        WHERE  a.recommender IN (SELECT user_id FROM sales_member WHERE  grp = :grp)
+                        WHERE {$where_cond}
                         AND Date(b.reg_date) BETWEEN '$start_date' AND '$end_date'
                     ) AS tot_table
             ";
@@ -83,39 +87,93 @@
         $tot_leader_comm = isset($row['tot_leader_comm']) && !empty($row['tot_leader_comm']) ? $row['tot_leader_comm'] : 0;
         $tot_sa_comm = isset($row['tot_sa_comm']) && !empty($row['tot_sa_comm']) ? $row['tot_sa_comm'] : 0;
 
-        
-        
+        $price = $session_grp_flag==1 ? floor($tot_leader_comm/1000) * 1000 : floor($tot_sa_comm/1000) * 1000;
+        $share = $session_grp_flag==1 ? $tot_leader_comm % 1000 : $tot_sa_comm % 1000;
+        if ($price==0) throw new Exception('금액이 부족합니다.(1,000원 이상부터)');
 
+        //---------------------------------------            
         //api 전송
+        //---------------------------------------
+        $request_array = array (
+            'auth'         => 'ab3cc932e99600ef8e3f361e8ea0653f121b986e06f52b8c5fe0b06a53307d00'
+            , 'action'     => 'qrCreateToken'
+            , 'product_no' => 1008
+            , 'price'      => intval($price)
+        );
 
-        // 정보 insert
+        $json = post(API_URL, $request_array);
+        $result = json_decode($json, true);
+        if ($result['status'] == 0) throw new Exception($result['msg']);
+
+        //---------------------------------------------------------------------------------------------------------------
+        // 트랜잭션 시작
+        $db->beginTransaction();
 
 
+        //---------------------------------------
+        // 추출 핀코드 저장
+        //---------------------------------------
+        $query = 
+            "
+                INSERT INTO sales_settlement_pincode (set_date
+                                                    , user_id
+                                                    , price
+                                                    , token
+                                                ) VALUES (
+                                                    :set_date
+                                                    , :user_id
+                                                    , :price
+                                                    , :token
+                                                )
+            ";
+        $statement = $db->prepare($query);
+        $statement->bindValue(':set_date', $date);
+        $statement->bindValue(':user_id', $session_user_id);
+        $statement->bindValue(':price', intval($price));
+        $statement->bindValue(':token', $result['token']);
+        $statement->execute();
+        $rowCount = $statement->rowCount();
+        if ($rowCount <> 1) {
+            $db->rollBack();
+            throw new Exception('핀코드 정보 입력 실패');
+        }
 
-        // //group update
-        // $query = "UPDATE sales_group_list SET comm_rate = :comm_rate WHERE grp = :grp";
-        // $statement = $db->prepare($query);
-        // $statement->bindValue(':comm_rate', $comm);
-        // $statement->bindValue(':grp', $grp);
-        // $statement->execute();
+        //---------------------------------------
+        // 잔액 업뎃
+        //---------------------------------------
+        if ($share > 0) {
+            $query = "UPDATE sales_member SET share = share + :share WHERE user_id = :user_id";
+            $statement = $db->prepare($query);
+            $statement->bindValue(':share', intval($share));
+            $statement->bindValue(':user_id', $session_user_id);
+            $statement->execute();
+            $rowCount = $statement->rowCount();
 
-        // //개별 update
-        // $query = "UPDATE sales_member SET comm_rate = :comm_rate WHERE seq_no = :seq_no";
-        // $statement = $db->prepare($query);
-        // $statement->bindValue(':comm_rate', $comm);
-        // $statement->bindValue(':seq_no', $seq_no);
-        // $statement->execute();
+            if ($rowCount <> 1) {
+                $db->rollBack();
+                throw new Exception('잔액 정보 입력 실패');
+            }
+        }
         
+
+        // 완료되었으면 커밋
+        $db->commit();
+
 
         $result_array = array (
             'status' => 1
             , 'msg'  => 'ok'
         );
 
+
         return parseJson($result_array);
         
     } catch(Exception $e) {
-        return parseJson(array('status' => 0, 'msg' => $e->getMessage()));
+        if ($e->getCode() === '23000') { // 이미 추출한 상태
+            return parseJson(array('status' => 0, 'msg' => '이미 정산 하였습니다.'));
+        } else {
+            return parseJson(array('status' => 0, 'msg' => $e->getMessage()));
+        }
     } catch(PDOException $e) {
         return parseJson(array('status' => 0, 'msg' => $e->getMessage()));
     }
@@ -123,6 +181,5 @@
     function parseJson($data){
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); // 유니코드, 역슬래시 제거
     }
-
 
 ?>
