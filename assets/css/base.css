@@ -39,6 +39,14 @@
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(4){width:10%}
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(5){width:10%;}
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(6){width:40%;}
+.contWrap .cont.management .contTable table tr td:nth-of-type(1){width:5%}
+.contWrap .cont.management .contTable table tr td:nth-of-type(2){width:10%}
+.contWrap .cont.management .contTable table tr td:nth-of-type(3){width:10%}
+.contWrap .cont.management .contTable table tr td:nth-of-type(4){width:10%}
+.contWrap .cont.management .contTable table tr td:nth-of-type(5){width:10%;}
+.contWrap .cont.management .contTable table tr td:nth-of-type(6){width:45%;}
+.contWrap .cont.management .contTable table tr td:nth-of-type(7){width:10%;}
+
 .pagination{display:flex;flex-direction:row;justify-content:center;margin:20px 0;align-items:center}
 .pagination li{width:30px}
 @media (max-width:770px){

@@ -36,6 +36,7 @@
                 </li>
                 <li class="nav"><a href="fee_detail.php">수수료 조회</a></li>
                 <li class="nav"><a href="settlement.php">정산</a></li>
+                <li class="nav"><a href="management.php">잔액관리</a></li>
             </ul>
         </div>
     </div>

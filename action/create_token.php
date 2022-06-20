@@ -39,6 +39,17 @@
         // date 검증
         if (!password_verify($date.$salt, $hash)) throw new Exception('잘못된 접근입니다.(4)');
 
+
+        // pincode 확인
+        $query = "SELECT * FROM sales_settlement_pincode WHERE set_date = :set_date AND user_id = :user_id";
+        $statement = $db->prepare($query);
+        $statement->bindValue(':set_date', $date);
+        $statement->bindValue(':user_id', $session_user_id);
+        $statement->execute();
+        $rowCount = $statement->rowCount();
+        if ($rowCount > 0) throw new Exception('이미 정산을 하였습니다.');
+
+
         //---------------------------------------
         // 금액 추출
         //---------------------------------------
@@ -64,7 +75,6 @@
             throw new Exception ('잘못된 접근입니다.(5)');
         }
 
-        // temp테이블 체크할 것!!!!!!!!!!!!!!!!!!!!!!
         $where_cond = $session_grp_flag==1 ? "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp)" : "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp AND user_id = '{$session_user_id}')";
         $query = 
             "
@@ -109,7 +119,7 @@
             //api 전송
             //---------------------------------------
             $request_array = array (
-                'auth'         => 'ab3cc932e99600ef8e3f361e8ea0653f121b986e06f52b8c5fe0b06a53307d00'
+                'auth'         => AUTH_TOKEN
                 , 'action'     => 'qrCreateToken'
                 , 'product_no' => 1008
                 , 'price'      => intval($price)
@@ -151,11 +161,11 @@
         if (!$share_flag) { // 금액이 있지만 1000원 미만일 경우 잔액만 업로드 한다.
             $statement->bindValue(':price', intval($price));
             $statement->bindValue(':token', $result['token']);
-            $statement->bindValue(':balance', $share);
+            $statement->bindValue(':balance', intval($share));
         } else {
             $statement->bindValue(':price', NULL);
             $statement->bindValue(':token', 'balance');
-            $statement->bindValue(':balance', $share);
+            $statement->bindValue(':balance', intval($share));
         }
         $statement->execute();
         $rowCount = $statement->rowCount();
@@ -187,7 +197,7 @@
 
         if ($share==0) {
 
-            
+
             $result_array = array (
                 'status' => 1
                 , 'msg'  => 'ok'
@@ -199,7 +209,7 @@
             $result_array = array (
                 'status' => 2
                 , 'msg'  => 'ok'
-                , 'data' => '잔금 '.$share.'원이 추가되었습니다.'
+                , 'data' => '잔액 '.$share.'원이 추가되었습니다.'
             );
         }
 

@@ -146,25 +146,29 @@
                 <p><?=$session_user_id.$str_grp?> 님</p>
                 <button type="button" class="btn" onclick="location.replace('./action/logout.php');">로그아웃</button>
             </div>
-            <h1>정산</h1>
+            <h1>잔액관리</h1>
         </div>
-        <div class="cont settlement">
+        <div class="cont management">
             <div class="contInput">
                 <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
-                    <input type="month" name="month" value="<?=$get_month?>"> 
-                    <button type="submit" class="btn">조회</button>
+                    <input type="number" placeholder="금액" step="1000" min="0">
+                    <button type="submit" class="btn">QR핀코드 추출</button>
                 </form>
             </div>
+            <ul class="flexBox">
+                <li><p>현재잔액:</p><p>4,123,985</p>원</li>      
+            </ul>
             <div class="contTable">
                 <table>
                     <thead>
                         <tr>
-                            <td>기간</td>
-                            <td>수수료 합계</td>
-                            <td>정산</td>
-                            <td>핀코드 금액</td>
-                            <td>잔액</td>
-                            <td>핀코드</td>
+                            <td>번호</td>
+                            <td>상품권종류</td>
+                            <td>이전잔액</td>
+                            <td>요청금액</td>
+                            <td>갱신잔액</td>
+                            <td>QR핀코드</td>
+                            <td>등록날짜</td>
                         </tr> 
                     </thead>
                     <?php
@@ -183,20 +187,13 @@
                     ?>
                     <tbody>
                         <tr>
-                            <td><?=$period?></td>
-                            <td><?=$session_grp_flag==1 ? number_format($tot_leader_comm) : number_format($tot_sa_comm)?></td>
-                            <td>
-                                <?php 
-                                    if ($token=='-' && $act_button==1) {
-                                ?>
-                                    <button onclick="create_token('<?=$year_month_day?>', '<?=$date_hash?>', '<?=$_csrfToken?>');">정산</button>
-                                <?php } else { ?>
-                                    <button disabled>정산</button>
-                                <?php } ?>
-                            </td>
-                            <td><?=$price?></td>
-                            <td><?=$balance?></td>
-                            <td><?=$token=='balance' ? '-' : $token?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
                         <?php } // end while ?>
                     </tbody>
