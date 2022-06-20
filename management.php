@@ -3,8 +3,10 @@
 
     include('header.php');
     include_once "../db_connecter.php";
+    include_once "../paging.php";
 
     $conn = new Database_Connecter();
+    $paging = new Paging();
     $db = $conn->MYSQL_ConnectServer();
 
 
@@ -13,126 +15,45 @@
     $session_grp = isset($_SESSION['Grp']) ? $_SESSION['Grp'] : '';
     $session_grp_flag = isset($_SESSION['GrpFlag']) ? $_SESSION['GrpFlag'] : '';
     $_csrfToken = isset($_SESSION['_csrfToken']) ? $_SESSION['_csrfToken'] : '';
-
-    // 파라미터
-    $get_month = isset($_GET['month']) && !empty($_GET['month']) ? $_GET['month'] : date('Y-m');
-
-
-    //--------------------------------------------------------
     $str_grp = $session_grp_flag==1 ? '(그룹장)' : '';
-    $year_1 = $get_month.'-01';
-    $year_10 = $get_month.'-10';
-    $year_1_10 = $get_month.'-15';
 
-    $year_11 = $get_month.'-11';
-    $year_20 = $get_month.'-20';
-    $year_11_20 = $get_month.'-25';
 
-    $year_21 = $get_month.'-21';
-    $year_last = $get_month.'-'.date('t', strtotime($get_month));
-    $year_21_last = date("Y-m", strtotime("+1 month", strtotime($get_month))).'-05';
+    //-----------------------
+    // 페이징 관련
+    //-----------------------
+    $page = isset($_GET['page']) ? $_GET['page'] : 1;
+    $pageSize = 50;
+    $startRow = ($page-1) * $pageSize;
+    $url = $_SERVER['PHP_SELF'];
 
-    $where_cond = $session_grp_flag==1 ? "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp)" : "a.recommender IN (SELECT user_id FROM sales_member WHERE grp = :grp AND user_id = '{$session_user_id}')";
     // 쿼리
     try {
-        $query = 
-            "
-                (
-                    SELECT SUM(leader_comm) AS tot_leader_comm
-                            , SUM(sa_comm) AS tot_sa_comm
-                            , COUNT(seq_no) AS tot_record
-                            , act_button
-                            , '$year_1 ~ $year_10' AS period
-                            , '$year_1_10' AS year_month_day
-                            , token
-                            , price
-                            , balance
-                    FROM (
-                            SELECT b.seq_no AS seq_no
-                                , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
-                                , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
-                                , IF(curdate() >= '$year_1_10', 1, 0) AS act_button
-                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as token
-                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as price
-                                , (SELECT balance FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_1_10') as balance
-                            FROM   info_service AS a
-                            JOIN commission_history AS b
-                                ON a.token = b.auth_key
-                            JOIN sales_member AS c
-                                ON a.recommender = c.user_id
-                            JOIN sales_group_list AS d
-                                ON c.grp = d.grp
-                            WHERE  {$where_cond}
-                            AND DATE(b.reg_date) BETWEEN '$year_1' AND '$year_10'
-                    ) AS tot_table 
-                )
-                UNION ALL
-                (
-                    SELECT SUM(leader_comm) AS tot_leader_comm
-                            , SUM(sa_comm) AS tot_sa_comm
-                            , COUNT(seq_no) AS tot_record
-                            , act_button
-                            , '$year_11 ~ $year_20' AS period
-                            , '$year_11_20' AS year_month_day
-                            , token
-                            , price
-                            , balance
-                    FROM (
-                            SELECT b.seq_no AS seq_no
-                                , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
-                                , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
-                                , IF(curdate() >= '$year_11_20', 1, 0) AS act_button
-                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as token
-                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as price
-                                , (SELECT balance FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_11_20') as balance
-                            FROM   info_service AS a
-                            JOIN commission_history AS b
-                                ON a.token = b.auth_key
-                            JOIN sales_member AS c
-                                ON a.recommender = c.user_id
-                            JOIN sales_group_list AS d
-                                ON c.grp = d.grp
-                            WHERE  {$where_cond}
-                            AND DATE(b.reg_date) BETWEEN '$year_11' AND '$year_20'
-                    ) AS tot_table 
-                )
-                UNION ALL
-                (
-                    SELECT SUM(leader_comm) AS tot_leader_comm
-                            , SUM(sa_comm) AS tot_sa_comm
-                            , COUNT(seq_no) AS tot_record
-                            , act_button
-                            , '$year_21 ~ $year_last' AS period
-                            , '$year_21_last' AS year_month_day
-                            , token
-                            , price
-                            , balance
-                    FROM (
-                            SELECT b.seq_no AS seq_no
-                                , IF(c.grp_flag = 1, b.commission * 0.1 * d.comm_rate, (b.commission * 0.1 * d.comm_rate ) - truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS leader_comm
-                                , IF(c.grp_flag = 1, 0, truncate(((commission * 0.1 * d.comm_rate) * 0.01 * c.comm_rate), 0)) AS sa_comm
-                                , IF(curdate() >= '$year_21_last', 1, 0) AS act_button
-                                , (SELECT token FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as token
-                                , (SELECT price FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as price
-                                , (SELECT balance FROM sales_settlement_pincode WHERE user_id = '$session_user_id' AND set_date = '$year_21_last') as balance
-                            FROM   info_service AS a
-                            JOIN commission_history AS b
-                                ON a.token = b.auth_key
-                            JOIN sales_member AS c
-                                ON a.recommender = c.user_id
-                            JOIN sales_group_list AS d
-                                ON c.grp = d.grp
-                            WHERE  {$where_cond}
-                            AND DATE(b.reg_date) BETWEEN '$year_21' AND '$year_last'
-                    ) AS tot_table 
-                )
-            ";
 
-
-
+        // 잔액
+        $query = "SELECT share FROM sales_member WHERE user_id = :user_id";
         $statement = $db->prepare($query);
-        $statement->bindValue(':grp', $session_grp);
+        $statement->bindValue(':user_id', $session_user_id);
         $statement->execute();
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        $share = isset($row['share']) && !empty($row['share']) ? $row['share'] : 0;
+
+
+        //페이징 레코드
+        $query = "SELECT * FROM sales_qr_pin_list WHERE user_id = :user_id";
+        $statement = $db->prepare($query);
+        $statement->bindValue(':user_id', $session_user_id);
+        $statement->execute();
+        $totRecord = $statement->rowCount();
+
+        $config = array(
+          'base_url' => $url,
+          'page_rows' => $pageSize,
+          'total_rows' => $totRecord
+        );
+    
+        $paging->initialize($config);
+        $pagination = $paging->create();
+        
 
     } catch (PDOException $e) {
         die($e->getMessage());
@@ -150,13 +71,14 @@
         </div>
         <div class="cont management">
             <div class="contInput">
-                <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
-                    <input type="number" placeholder="금액" step="1000" min="0">
+                <form class="frm" name="frm" id="frm" onsubmit="return form_check(this);">
+                    <input type="number" name="price" placeholder="금액" step="1000" min="0">
+                    <input type="hidden" name="_csrfToken" value="<?=$_csrfToken?>" />
                     <button type="submit" class="btn">QR핀코드 추출</button>
                 </form>
             </div>
             <ul class="flexBox">
-                <li><p>현재잔액:</p><p>4,123,985</p>원</li>      
+                <li><p>현재잔액:</p><p><?=number_format($share)?></p>원</li>      
             </ul>
             <div class="contTable">
                 <table>
@@ -172,28 +94,25 @@
                         </tr> 
                     </thead>
                     <?php
-                        
                         while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                            $tot_leader_comm = isset($row['tot_leader_comm']) && !empty($row['tot_leader_comm']) ? $row['tot_leader_comm'] : 0;
-                            $tot_sa_comm = isset($row['tot_sa_comm']) && !empty($row['tot_sa_comm']) ? $row['tot_sa_comm'] : 0;
-                            $act_button = isset($row['act_button']) ? $row['act_button'] : 0;
-                            $period = isset($row['period']) ? $row['period'] : '';
-                            $year_month_day = isset($row['year_month_day']) ? $row['year_month_day'] : '';
-                            $token = isset($row['token']) && !empty($row['token']) ? $row['token'] : '-';
-                            $price = isset($row['price']) && !empty($row['price']) ? number_format($row['price']) : 0;
-                            $balance = isset($row['balance']) && !empty($row['balance']) ? number_format($row['balance']) : 0;
-
-                            $date_hash = password_hash($year_month_day.'ax2$@$$!w', PASSWORD_DEFAULT);
+                            $seq_no = isset($row['seq_no']) ? $row['seq_no'] : 0;
+                            $product_no = isset($row['product_no']) ? $row['product_no'] : '';
+                            $product_name = isset($row['product_name']) ? $row['product_name'] : '';
+                            $before_price = isset($row['before_price']) ? $row['before_price'] : 0;
+                            $price = isset($row['price']) ? $row['price'] : 0;
+                            $now_price = isset($row['now_price']) ? $row['now_price'] : 0;
+                            $token = isset($row['token']) ? $row['token'] : '';
+                            $reg_date = isset($row['reg_date']) ? $row['reg_date'] : '';
                     ?>
                     <tbody>
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td><?=$seq_no?></td>
+                            <td><?=$product_name?></td>
+                            <td><?=number_format($before_price)?></td>
+                            <td><?=number_format($price)?></td>
+                            <td><?=number_format($now_price)?></td>
+                            <td><?=$token?></td>
+                            <td><?=$reg_date?></td>
                         </tr>
                         <?php } // end while ?>
                     </tbody>
