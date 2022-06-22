@@ -148,9 +148,9 @@
             </div>
             <h1>정산</h1>
         </div>
-        <div class="cont settlement">
+        <div class="cont settlement m-flex-wide">
             <div class="contInput">
-                <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
+                <form class="frm flex-mid" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
                     <input type="month" name="month" value="<?=$get_month?>"> 
                     <button type="submit" class="btn">조회</button>
                 </form>

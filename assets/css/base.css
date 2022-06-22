@@ -19,10 +19,10 @@
 .admin_btn{border-radius:7px;align-items:center;background:var(--bg-lighter);text-align:left;display:inline-flex;flex-direction:row;float:right;padding:10px 15px;position:absolute;right:0}
 .admin_btn button{background:var(--point);color:var(--light);padding:10px;font-size:13px;margin:0 0 0 20px}
 .contWrap .cont{width:100%;background:var(--light);height:fit-content}
-.contWrap .cont .contInput{margin:20px 0 30px;height:50px;display:flex;align-items:center;justify-content:center;flex-direction:row}
+.contWrap .cont .contInput{margin:20px 0 30px;}
 .contWrap .cont .contInput form{width:100%;height:100%}
-.contWrap .cont .contInput input{width:120px;height:100%;margin:0 5px;padding:0 15px}
-.contWrap .cont .contInput button{width:150px;height:100%;background:var(--txt);color:var(--light);margin:0 0 0 10px}
+.contWrap .cont .contInput input{width:120px;height:50px;margin:0 5px;padding:0 15px}
+.contWrap .cont .contInput button{width:150px;height:50px;background:var(--txt);color:var(--light);margin:0 0 0 10px}
 .contWrap .cont .flexBox{display:flex;justify-content:center;border-top:1px solid var(--border);background:var(--bg-lighter)}
 .contWrap .cont .flexBox li{padding:15px 0}
 .contWrap .cont .flexBox li p{display:inline-block;width:150px;font-size:15px;text-align:center}
@@ -33,6 +33,7 @@
 .contWrap .cont .contTable table thead tr td{background:var(--bg-light);height:30px}
 .contWrap .cont .contTable table tbody tr td{word-break:break-word;padding:0 5px}
 .contWrap .cont .contTable table tbody tr td button{width:100%;height:100%;border-radius:0;background:var(--sub)}
+/*세부*/
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(1){width:20%}
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(2){width:10%}
 .contWrap .cont.settlement .contTable table tr td:nth-of-type(3){width:10%}
@@ -46,7 +47,10 @@
 .contWrap .cont.management .contTable table tr td:nth-of-type(5){width:10%;}
 .contWrap .cont.management .contTable table tr td:nth-of-type(6){width:45%;}
 .contWrap .cont.management .contTable table tr td:nth-of-type(7){width:10%;}
+/**/
 
+
+.flex-mid{display:flex;flex-direction: row;align-items: center;justify-content: center;}
 .pagination{display:flex;flex-direction:row;justify-content:center;margin:20px 0;align-items:center}
 .pagination li{width:30px}
 @media (max-width:770px){
@@ -60,16 +64,14 @@
     #header .gnb ul li.btnNav .ico_x{display:none;position:absolute;right:20px}
     #header .gnb ul .nav{display:none;width:100%;background:var(--light);border-bottom:1px solid var(--bg-light)}
     #header .gnb li a:hover:after{display:none}
-    #header .gnb li a{color:var(--txt)!important;width:100%;height:50px;font-size:13px;line-height:50px}
     div.admin_btn{padding:0 0 0 10px;font-size:12px;top:-10px;right:10px}
     div.admin_btn button{font-size:12px;padding:5px;margin:0 0 0 10px}
     section.contWrap .titleBox{align-items:flex-end;height:50px}
-    section.contWrap .cont .contInput{margin:20px 0 100px}
-    section.contWrap .cont .contInput input{width:25%}
+    section.contWrap .cont .contInput form.flex-mid{flex-direction:column;}
+    section.contWrap .cont .contInput input{width:50%}
     section.contWrap .cont .contInput button{width:70%;margin:15px auto 0}
     section.contWrap .cont .flexBox li p{font-size:13px;}
-    section.contWrap .cont.settlement .contTable table tr td:nth-of-type(1){width:40%}
-    section.contWrap .cont.settlement .contTable table tr td:nth-of-type(2){width:20%}
-    section.contWrap .cont.settlement .contTable table tr td:nth-of-type(3){width:20%}
-    section.contWrap .cont.settlement .contTable table tr td:nth-of-type(4){width:20%}
+    section.contWrap .cont.m-flex-wide .contTable table tr{display: flex;flex-direction: column;align-items: center;justify-content: center;border-bottom: 1px solid var(--txt);}
+    section.contWrap .cont.m-flex-wide .contTable table tr td{width:100%!important;border-top: 0;border-left: 0;border-right: 0;padding: 5px;height: fit-content;}
+    .contWrap .cont.m-flex-wide .contTable table tbody tr td button{height:30px;}
 }

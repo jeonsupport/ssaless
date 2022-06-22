@@ -69,9 +69,9 @@
             </div>
             <h1>잔액관리</h1>
         </div>
-        <div class="cont management">
+        <div class="cont management m-flex-wide">
             <div class="contInput">
-                <form class="frm" name="frm" id="frm" onsubmit="return form_check(this);">
+                <form class="frm flex-mid" name="frm" id="frm" onsubmit="return form_check(this);">
                     <input type="number" name="price" placeholder="금액" step="1000" min="0">
                     <input type="hidden" name="hap" value="<?=$share?>" />
                     <input type="hidden" name="_csrfToken" value="<?=$_csrfToken?>" />

@@ -100,7 +100,7 @@
         </div>
         <div class="cont fee">
             <div class="contInput">
-                <form class="frm" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
+                <form class="frm flex-mid" name="schfrm" id="schfrm" action="<?=$_SERVER['PHP_SELF']?>">
                     <input type="date" name="dateA" value="<?=$startDate?>"> ~ 
                     <input type="date" name="dateB" value="<?=$endDate?>">
                     <button type="submit" class="btn">조회</button>
