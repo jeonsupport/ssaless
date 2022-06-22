@@ -39,7 +39,7 @@
 
 
         //페이징 레코드
-        $query = "SELECT * FROM sales_qr_pin_list WHERE user_id = :user_id";
+        $query = "SELECT * FROM sales_qr_pin_list WHERE user_id = :user_id ORDER BY reg_date DESC";
         $statement = $db->prepare($query);
         $statement->bindValue(':user_id', $session_user_id);
         $statement->execute();
@@ -73,6 +73,7 @@
             <div class="contInput">
                 <form class="frm" name="frm" id="frm" onsubmit="return form_check(this);">
                     <input type="number" name="price" placeholder="금액" step="1000" min="0">
+                    <input type="hidden" name="hap" value="<?=$share?>" />
                     <input type="hidden" name="_csrfToken" value="<?=$_csrfToken?>" />
                     <button type="submit" class="btn">QR핀코드 추출</button>
                 </form>

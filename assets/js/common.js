@@ -37,6 +37,7 @@ function create_token(date, hash, csrf) {
 
 function form_check(f) {
     let price = f.price.value;
+    let hap = f.hap.value;
     let __csrfToken = f._csrfToken.value;
 
     if (f.price.value == '') {
@@ -47,6 +48,11 @@ function form_check(f) {
     price = Math.floor(price/1000) * 1000;
     if (price == 0) {
         alert("금액은 천 단위만 입력이 가능합니다.");
+        return false;
+    }
+
+    if (price > hap) {
+        alert("잔액이 부족합니다.");
         return false;
     }
 
@@ -64,9 +70,6 @@ function form_check(f) {
             success: function(data){ 
                 if(data.status == 1) {
                     alert('성공');
-                    location.reload();
-                } else if(data.status == 2){
-                    alert(data.data);
                     location.reload();
                 } else {
                     alert(data.msg);

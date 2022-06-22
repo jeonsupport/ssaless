@@ -16,6 +16,10 @@
 <title>apigather 영업사</title>
 <meta content="width=device-width, initial-scale=1.0, user-scalable=0" name="viewport">
 <meta name="format-detection" content="telephone=no">
+<meta http-equiv="Expires" content="10">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Content-Type" content="text/xml;charset=utf-8">
 <link href="assets/img/favicon.ico" rel="icon">
 <link href="assets/img/i_logo.png" rel="apple-touch-icon">
 <link href="assets/css/base.css" rel="stylesheet">
@@ -27,7 +31,7 @@
 <header id="header">
     <div class="h_bg"></div>
     <div class="inner">
-        <h1 class="logo"><a href="fee_detail.php"><img src="assets/img/logo.png" alt="apigather 영업사"></a></h1>
+        <h1 class="logo"><a href="fee_detail.php"><img src="assets/img/logo.png"></a></h1>
         <div class="gnb" id="gnb">
             <ul>
                 <li class="btnNav">

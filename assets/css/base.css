@@ -64,9 +64,10 @@
     div.admin_btn{padding:0 0 0 10px;font-size:12px;top:-10px;right:10px}
     div.admin_btn button{font-size:12px;padding:5px;margin:0 0 0 10px}
     section.contWrap .titleBox{align-items:flex-end;height:50px}
-    section.contWrap .cont .contInput{height:35px;margin:20px 0 80px}
+    section.contWrap .cont .contInput{margin:20px 0 100px}
     section.contWrap .cont .contInput input{width:25%}
     section.contWrap .cont .contInput button{width:70%;margin:15px auto 0}
+    section.contWrap .cont .flexBox li p{font-size:13px;}
     section.contWrap .cont.settlement .contTable table tr td:nth-of-type(1){width:40%}
     section.contWrap .cont.settlement .contTable table tr td:nth-of-type(2){width:20%}
     section.contWrap .cont.settlement .contTable table tr td:nth-of-type(3){width:20%}

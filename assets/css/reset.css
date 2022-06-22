@@ -13,7 +13,7 @@
     --font:'Noto Sans KR','Open Sans',sans-serif;
 }
 @media screen and (max-width:770px){
-    body,
+    body{font-size:12px!important}
     body pre,
     body input,
     body button{font-size:13px}
