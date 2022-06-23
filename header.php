@@ -7,6 +7,7 @@
     if(empty($_SESSION['UserID']) || empty($_SESSION['_csrfToken']) || !check_referer()) {
         movepage("./action/logout.php", "잘못된 접근입니다.");
     }
+    
 ?>
 
 <!DOCTYPE html>
